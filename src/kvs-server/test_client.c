@@ -53,17 +53,17 @@ int main(int argc, char   *argv[ ])
    struct rdma_event_channel		*cm_channel; 
    struct rdma_cm_id						*cm_id; 
    struct rdma_cm_event					*event;  
-   struct rdma_conn_param				conn_param = {0};  
+   struct rdma_conn_param				conn_param;  
    struct ibv_pd								*pd; 
    struct ibv_comp_channel			*comp_chan; 
    struct ibv_cq								*cq; 
    struct ibv_cq								*evt_cq; 
    struct ibv_mr								*mr; 
-   struct ibv_qp_init_attr			qp_attr = { 0}; 
+   struct ibv_qp_init_attr			qp_attr; 
    struct ibv_sge								sge; 
-   struct ibv_send_wr						send_wr = { 0}; 
+   struct ibv_send_wr						send_wr; 
    struct ibv_send_wr 					*bad_send_wr; 
-   struct ibv_recv_wr						recv_wr = { 0}; 
+   struct ibv_recv_wr						recv_wr; 
    struct ibv_recv_wr						*bad_recv_wr; 
    struct ibv_wc								wc; 
    void													*cq_context; 
@@ -75,6 +75,10 @@ int main(int argc, char   *argv[ ])
 	uint32_t										*buf; 
 	int													 err;
 
+	memset(&conn_param, 0, sizeof(rdma_conn_param));
+	memset(&qp_attr, 0, sizeof(ibv_qp_init_attr));
+	memset(&send_wr, 0, sizeof(ibv_send_wr));
+	memset(&recv_wr, 0, sizeof(ibv_recv_wr));
        /* Set up RDMA CM structures */ 
 			cm_channel = rdma_create_event_channel(); 
 			if (!cm_channel)  return 1; 
@@ -121,7 +125,7 @@ int main(int argc, char   *argv[ ])
 					return 1; 
   		if (ibv_req_notify_cq(cq,  0)) 
 					return 1; 
- 			buf = calloc(1, sizeof (uint32_t)); 
+ 			buf = (uint32_t *)calloc(1, sizeof (uint32_t)); 
 			if (!buf) 
 					return 1; 
 			mr = ibv_reg_mr(pd, buf,1 * sizeof(uint32_t), IBV_ACCESS_LOCAL_WRITE |IBV_ACCESS_REMOTE_READ | IBV_ACCESS_REMOTE_WRITE); 

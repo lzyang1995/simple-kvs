@@ -339,6 +339,7 @@ void * thread_func(void *arg)
 	}
 
 	printf("%"PRIu32"\n", ntohl(buf[0]));
+	buf[0] = ntohl(buf[0]);
 	buf[0] = buf[0] + 1;
 
 	sge.addr    = (uintptr_t) buf; 
