@@ -270,9 +270,9 @@ void * thread_func(void *arg)
 		return NULL;
     }
 
-    memset(&recv_wr, 0, sizeof(ibv_recv_wr));
-    memset(&conn_param, 0, sizeof(rdma_conn_param));
-    memset(&send_wr, 0, sizeof(ibv_send_wr));
+    memset(&recv_wr, 0, sizeof(struct ibv_recv_wr));
+    memset(&conn_param, 0, sizeof(struct rdma_conn_param));
+    memset(&send_wr, 0, sizeof(struct ibv_send_wr));
 
     sge.addr    = (uintptr_t)buf;
     sge.length  = sizeof(uint32_t);

@@ -75,10 +75,10 @@ int main(int argc, char   *argv[ ])
 	uint32_t										*buf; 
 	int													 err;
 
-	memset(&conn_param, 0, sizeof(rdma_conn_param));
-	memset(&qp_attr, 0, sizeof(ibv_qp_init_attr));
-	memset(&send_wr, 0, sizeof(ibv_send_wr));
-	memset(&recv_wr, 0, sizeof(ibv_recv_wr));
+	memset(&conn_param, 0, sizeof(struct rdma_conn_param));
+	memset(&qp_attr, 0, sizeof(struct ibv_qp_init_attr));
+	memset(&send_wr, 0, sizeof(struct ibv_send_wr));
+	memset(&recv_wr, 0, sizeof(struct ibv_recv_wr));
        /* Set up RDMA CM structures */ 
 			cm_channel = rdma_create_event_channel(); 
 			if (!cm_channel)  return 1; 
