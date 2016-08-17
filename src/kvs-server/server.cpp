@@ -341,9 +341,10 @@ void * thread_func(void *arg)
 	printf("%"PRIu32"\n", ntohl(buf[0]));
 	buf[0] = ntohl(buf[0]);
 	buf[0] = buf[0] + 1;
+	buf[0] = htonl(buf[0]);
 
-	sge.addr    = (uintptr_t) buf; 
-    sge.length  = sizeof (uint32_t); 
+	sge.addr    = (uintptr_t)buf; 
+    sge.length  = sizeof(uint32_t); 
     sge.lkey    = mr->lkey; 
                                                               
     send_wr.opcode = IBV_WR_RDMA_WRITE_WITH_IMM; 
