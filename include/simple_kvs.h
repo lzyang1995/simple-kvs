@@ -90,7 +90,7 @@ struct message_t
 	uint64_t key_len;
 	uint64_t data_len;
 	byte key_and_data[0];
-};
+} __attribute__ ((packed));
 typedef struct message_t message_t;
 
 #endif
