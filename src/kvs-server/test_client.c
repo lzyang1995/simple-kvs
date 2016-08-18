@@ -58,7 +58,7 @@ int main(int argc, char   *argv[ ])
    struct ibv_comp_channel			*comp_chan; 
    struct ibv_cq								*cq; 
    struct ibv_cq								*evt_cq; 
-   struct ibv_mr								*mr; 
+   struct ibv_mr								*mr, *mr2; 
    struct ibv_qp_init_attr			qp_attr; 
    struct ibv_sge								sge; 
    struct ibv_send_wr						send_wr; 
@@ -125,12 +125,14 @@ int main(int argc, char   *argv[ ])
 					return 1; 
   		if (ibv_req_notify_cq(cq,  0)) 
 					return 1; 
+				
  			buf = (uint32_t *)calloc(1, sizeof (uint32_t)); 
 			if (!buf) 
 					return 1; 
 			mr = ibv_reg_mr(pd, buf,1 * sizeof(uint32_t), IBV_ACCESS_LOCAL_WRITE |IBV_ACCESS_REMOTE_READ | IBV_ACCESS_REMOTE_WRITE); 
 			if (!mr) 
 					return 1; 
+
 			qp_attr.cap.max_send_wr = 2; 
 			qp_attr.cap.max_send_sge = 1;
 			qp_attr.cap.max_recv_wr = 1; 
@@ -179,17 +181,35 @@ int main(int argc, char   *argv[ ])
 			buf[0] = htonl(buf[0]);
 			//buf[1] = htonl(buf[1]);
 
-			sge.addr                      = (uintptr_t)buf;
-			sge.length                    = sizeof (uint32_t);
-			sge.lkey                      =  mr->lkey;
+			//prepare key and value
+			char key[20] = "keyhaha";
+			char data[20] = "data yes";
+
+			message_t msg;
+			msg.cmd = CMD_PUT;
+			msg.key_len = htonll(strlen(key) + 1);
+			msg.data_len = htonll(strlen(data) + 1);
+			printf("sizeof message_t: %d\n", sizeof(message_t));
+			void * temp = malloc(sizeof(message_t) + strlen(key) + 1 + strlen(data) + 1);
+			memcpy(temp, &msg, sizeof(message_t));
+			memcpy(temp + sizeof(message_t), key, strlen(key) + 1);
+			memcpy(temp + sizeof(message_t) + strlen(key) + 1, data, strlen(data) + 1);
+
+			mr2 = ibv_reg_mr(pd, temp,sizeof(message_t) + strlen(key) + 1 + strlen(data) + 1, IBV_ACCESS_LOCAL_WRITE |IBV_ACCESS_REMOTE_READ | IBV_ACCESS_REMOTE_WRITE); 
+			if (!mr2) 
+					return 1; 
+
+			sge.addr                      = (uintptr_t)temp;
+			sge.length                    = sizeof(message_t) + strlen(key) + 1 + strlen(data) + 1;
+			sge.lkey                      =  mr2->lkey;
 			send_wr.wr_id                 = 1;
 			send_wr.opcode                 = IBV_WR_RDMA_WRITE_WITH_IMM;
 			send_wr.sg_list              = &sge;
 			send_wr.num_sge               = 1;
-			//send_wr.send_flags            = IBV_SEND_SIGNALED;
+			send_wr.send_flags            = IBV_SEND_SIGNALED;
 			send_wr.wr.rdma.rkey          = ntohl(server_pdata.rkey);
 			send_wr.wr.rdma.remote_addr   = ntohll(server_pdata.raddr);
-
+while(1){
      if (ibv_post_send(cm_id->qp, &send_wr,  &bad_send_wr))
 			return 1;
 			//sge.addr                      = (uintptr_t) buf + sizeof (uint32_t);
@@ -215,10 +235,10 @@ int main(int argc, char   *argv[ ])
 					return 1;
 			if (wc.status != IBV_WC_SUCCESS)
 					return 1;
-			if (wc.wr_id == 0) {
-					printf("%"PRIu32"\n", ntohl(buf[0]));
-					return 0;
-			}
-    
+			//if (wc.wr_id == 0) {
+			//		printf("%"PRIu32"\n", ntohl(buf[0]));
+			//		return 0;
+			//}
+    }
     return 0;
   }
