@@ -45,6 +45,8 @@
 
 #define RESOLVE_TIMEOUT_MS 5000
 
+#define CQE 1
+
 #define byte uint8_t
 
 /* TODO: this is going to be a server starting parameter */
@@ -125,6 +127,7 @@ struct db_t
 	byte 						*rev_buf;
 	struct ibv_mr				*send_mr;
 	struct ibv_mr				*rev_mr;
+	byte 						has_qp_created;
 };
 typedef struct db_t db_t;
 

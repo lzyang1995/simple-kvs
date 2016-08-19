@@ -18,8 +18,6 @@
 #include <simple_kvs.h>
 #include <simple_hash.h>
 
-#define CQE 1
-
 void * thread_func(void *arg);
 
 int main()
@@ -187,6 +185,7 @@ void * thread_func(void *arg)
 	blob_t						*key_blob = NULL, *data_blob = NULL;
 	uint32_t					key_len, data_len;
 	reply_t						*reply;
+	int 						has_qp_created = 0;
 
 	byte						*rev_buf = NULL, *send_buf = NULL;
 
@@ -269,6 +268,7 @@ void * thread_func(void *arg)
     	errmsg = QP_CREATION_FAILURE;
 		goto clean_exit;
     }
+    has_qp_created = 1;
 
     memset(&recv_wr, 0, sizeof(struct ibv_recv_wr));
     memset(&conn_param, 0, sizeof(struct rdma_conn_param));
@@ -681,7 +681,8 @@ void * thread_func(void *arg)
 */
 clean_exit:
 	/* TODO */
-	rdma_destroy_qp(thread_param_p->cm_id);
+	if(has_qp_created)
+		rdma_destroy_qp(thread_param_p->cm_id);
 	if(rev_mr != NULL)
 	{
 		if(ibv_dereg_mr(rev_mr) != 0)
@@ -709,6 +710,13 @@ clean_exit:
 		if(ibv_destroy_cq(cq) != 0)
 		{
 			fprintf(stderr, "Fails to destroy CQ: %s\n", strerror_l(errno, default_locale));
+		}
+	}
+	if(comp_channel != NULL)
+	{
+		if(ibv_destroy_comp_channel(comp_channel) != 0)
+		{
+			fprintf(stderr, "Fails to destroy completion channel: %s\n", strerror_l(errno, default_locale));
 		}
 	}
 	if(pd != NULL)

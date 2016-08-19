@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <string.h>
 #include <locale.h>
+#include <stdint.h>
 
 #include <simple_kvs.h>
 
@@ -9,8 +10,9 @@
  *	Initialize the connection with the kvs server
  *
  *	params:
- *	addr: the IP address or network hostname of the server
- *	port: the port number of the kvs service
+ *	addr: 		the IP address or network hostname of the server
+ *	port: 		the port number of the kvs service
+ *	buf_size: 	the size of RDMA write and receive buffer (in bytes)
  *
  *	return value:
  *	if failure, NULL is returned
@@ -19,7 +21,7 @@
  *	
  */
 
-db_t * kvsopen(char *addr, char *port)
+db_t * kvsopen(char *addr, char *port, uint32_t buf_size)
 {
 	locale_t 	default_locale = uselocale((locale_t)0);
 	int 	 	rv;
@@ -35,7 +37,7 @@ db_t * kvsopen(char *addr, char *port)
 	if(db->cm_channel == NULL)
 	{
 		fprintf(stderr, "Fails to create event channel: %s\n", strerror_l(errno, default_locale));
-		kvsclose(db);
+		free_resourses(db);
 		return NULL;
 	}
 
@@ -43,7 +45,7 @@ db_t * kvsopen(char *addr, char *port)
 	if(rdma_create_id(db->cm_channel, &db->cm_id, NULL, RDMA_PS_TCP) != 0)
 	{
 		fprintf(stderr, "Fails to create communication identifier: %s\n", strerror_l(errno, default_locale));
-		kvsclose(db);
+		free_resourses(db);
 		return NULL;
 	}
 	
@@ -57,10 +59,35 @@ db_t * kvsopen(char *addr, char *port)
 	if(rv != 0)
 	{
 		fprintf(stderr, "Fails to get address information: %s\n", gai_strerror(rv));
-		kvsclose(db);
+		free_resourses(db);
 		return NULL;
 	}
 
 	/* Resolve the address and route */
-	resolve(db, res);
+	if(resolve(db, res) != 0)
+	{
+		fprintf(stderr, "Fails to resolve the RDMA address and route: %s\n", strerror_l(errno, default_locale));
+		free_resourses(db);
+		return NULL;
+	}
+
+	/* setup_resources */
+	if(setup_resources(db, buf_size) != 0)
+	{
+		fprintf(stderr, "Fails to setup resourses for communication: %s\n", strerror_l(errno, default_locale));
+		free_resourses(db);
+		return NULL;
+	}
+
+	/* connect to server */
+	
+	
+
+    
+}
+
+int kvsclose(db_t *db)
+{
+	//send CMD_DISCONNECT to server
+	//free resourses
 }
