@@ -73,10 +73,6 @@ int main()
     	{
     		if(event->event == RDMA_CM_EVENT_CONNECT_REQUEST)
     		{
-#ifdef DEBUG
-    			rdma_reject(listen_id, NULL, 0);
-    			return 0;
-#endif
     			thread_param_p = (thread_param_t *)malloc(sizeof(thread_param_t));
     			/* the new thread is responsible to free it */
     			thread_param_p->cm_id = event->id;
@@ -296,6 +292,11 @@ void * thread_func(void *arg)
     }
 
     rdma_ack_cm_event(event);
+
+#ifdef DEBUG
+    rdma_disconnect(thread_param_p->cm_id);
+    return NULL;
+#endif
 
     while(1)
     {

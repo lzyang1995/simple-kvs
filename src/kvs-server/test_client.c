@@ -131,17 +131,21 @@ int main(int argc, char   *argv[ ])
 			err = rdma_get_cm_event(cm_channel,&event);
 			if (err)
 					return err;
-#ifdef DEBUG
-			if(event->event == RDMA_CM_EVENT_REJECTED)
-				printf("rejected\n");
-			else
-				printf("error\n");
-			return 0;
-#endif
 			if (event->event != RDMA_CM_EVENT_ESTABLISHED)
 					return 1;
 			memcpy(&server_pdata, event->param.conn.private_data, sizeof(server_pdata));
 			rdma_ack_cm_event(event);
+#ifdef DEBUG
+			err = rdma_get_cm_event(cm_channel,&event);
+			if (err)
+					return err;
+			if(event->event == RDMA_CM_EVENT_DISCONNECTED)
+				printf("disconnect\n");
+			else
+				printf("error\n");
+			return 0;
+#endif
+
 
 			/* Prepost receive */ 
 			sge.addr    =       (uintptr_t)buf; 
