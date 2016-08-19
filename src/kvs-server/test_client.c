@@ -146,7 +146,7 @@ int main(int argc, char   *argv[ ])
 			return 0;
 #endif
 
-
+//  above is open operation
 			/* Prepost receive */ 
 			sge.addr    =       (uintptr_t)buf; 
 			sge.length  =       sizeof(uint32_t); 
@@ -224,5 +224,6 @@ while(1){
 			//		return 0;
 			//}
     }
+//above is get/put/delete
     return 0;
   }
