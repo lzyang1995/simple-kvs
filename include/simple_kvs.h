@@ -87,8 +87,8 @@ typedef struct thread_param_t thread_param_t;
 struct message_t
 {
 	uint8_t cmd;
-	uint64_t key_len;
-	uint64_t data_len;
+	uint32_t key_len;
+	uint32_t data_len;
 	byte key_and_data[0];
 } __attribute__ ((packed));
 typedef struct message_t message_t;

@@ -13,6 +13,8 @@
 #include <locale.h>
 #include <inttypes.h>
 
+#define DEBUG
+
 enum   { 
         RESOLVE_TIMEOUT_MS        = 5000, 
 }; 
@@ -129,6 +131,13 @@ int main(int argc, char   *argv[ ])
 			err = rdma_get_cm_event(cm_channel,&event);
 			if (err)
 					return err;
+#ifdef DEBUG
+			if(event->event == RDMA_CM_EVENT_REJECTED)
+				printf("rejected\n");
+			else
+				printf("error\n");
+			return 0;
+#endif
 			if (event->event != RDMA_CM_EVENT_ESTABLISHED)
 					return 1;
 			memcpy(&server_pdata, event->param.conn.private_data, sizeof(server_pdata));
