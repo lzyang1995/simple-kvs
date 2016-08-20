@@ -80,10 +80,14 @@ db_t * kvsopen(char *addr, char *port, uint32_t buf_size)
 	}
 
 	/* connect to server */
+	if(connect_server(db) != 0)
+	{
+		fprintf(stderr, "Fails to connect to server: %s\n", strerror_l(errno, default_locale));
+		free_resourses(db);
+		return NULL;
+	}
 	
-	
-
-    
+	return db;
 }
 
 int kvsclose(db_t *db)

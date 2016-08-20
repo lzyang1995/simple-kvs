@@ -121,12 +121,14 @@ struct db_t
 	struct rdma_event_channel 	*cm_channel;
 	struct rdma_cm_id 			*cm_id;
 	struct ibv_pd				*pd;
-	struct ibv_comp_channel		*comp_channel;
+	/* do not use completion channel anymore. Use polling instead. */
+	//struct ibv_comp_channel		*comp_channel;
 	struct ibv_cq				*cq;
 	byte 						*send_buf;
 	byte 						*rev_buf;
 	struct ibv_mr				*send_mr;
 	struct ibv_mr				*rev_mr;
+	pdata_t						pdata;
 	byte 						has_qp_created;
 };
 typedef struct db_t db_t;

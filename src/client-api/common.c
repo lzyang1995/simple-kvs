@@ -101,6 +101,8 @@ void free_resourses(db_t *db)
 	}
 
 	/* destroy completion channel */
+	/* do not use completion channel anymore. Use polling instead. */
+	/*
 	if(db->comp_channel != NULL)
 	{
 		if(ibv_destroy_comp_channel(db->comp_channel) != 0)
@@ -108,6 +110,7 @@ void free_resourses(db_t *db)
 			fprintf(stderr, "Fails to destroy completion channel: %s\n", strerror_l(errno, default_locale));
 		}
 	}
+	*/
 
 	/* deallocate PD */
 	if(db->pd != NULL)
@@ -149,18 +152,24 @@ int setup_resources(db_t *db, uint32_t buf_size)
 		return -1;
 
 	/* completion channel */
+	/* do not use completion channel anymore. Use polling instead. */
+	/*
 	db->comp_channel = ibv_create_comp_channel(db->cm_id->verbs);
 	if (!db->comp_channel) 
-		return -1; 
+		return -1;
+	*/ 
 	
 	/* CQ */	
-	db->cq = ibv_create_cq(db->cm_id->verbs, CQE, NULL, db->comp_channel, 0); 
+	db->cq = ibv_create_cq(db->cm_id->verbs, CQE, NULL, NULL, 0); 
 	if (!db->cq) 
 		return -1; 
 
 	/* Arm notification on CQ */
+	/* do not use completion channel anymore. Use polling instead. */
+	/*
   	if (ibv_req_notify_cq(db->cq,  0) != 0) 
-		return -1; 
+		return -1;
+	*/ 
 
 	/* allocate memory for buffers */
 	db->rev_buf = (byte *)malloc(buf_size);
@@ -218,10 +227,12 @@ int qp_create(struct rdma_cm_id *cm_id, struct ibv_pd *pd, struct ibv_cq *cq)
  *	success: return 0
  *	failure: return -1
  */
+ //TODO: change this function to let server use it too.
 int connect_server(db_t *db)
 {
 	struct rdma_conn_param 	conn_param;
 	pdata_t					pdata;
+	struct rdma_cm_event	*event;
 
 	memset(&conn_param, 0, sizeof(struct rdma_conn_param));
 
@@ -236,4 +247,15 @@ int connect_server(db_t *db)
 
     if(rdma_connect(db->cm_id, &conn_param) != 0)
     	return -1;
+
+    if(rdma_get_cm_event(db->cm_channel, &event) != 0)
+    	return -1;
+
+    if(event->event != RDMA_CM_EVENT_ESTABLISHED)
+    	return -1;
+
+    memcpy(&db->pdata, event->param.conn.private_data, sizeof(pdata_t));
+    rdma_ack_cm_event(event);
+
+    return 0;
 }
