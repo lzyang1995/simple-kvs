@@ -128,9 +128,17 @@ struct db_t
 	byte 						*rev_buf;
 	struct ibv_mr				*send_mr;
 	struct ibv_mr				*rev_mr;
+	uint32_t 					buf_size;
 	pdata_t						pdata;
 	byte 						has_qp_created;
 };
 typedef struct db_t db_t;
+
+struct entry_t
+{
+	uint32_t len;
+	void *data;
+};
+typedef struct entry_t entry_t;
 
 #endif

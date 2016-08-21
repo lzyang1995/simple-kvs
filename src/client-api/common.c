@@ -180,6 +180,8 @@ int setup_resources(db_t *db, uint32_t buf_size)
 	if(!db->send_buf)
 		return -1;
 
+	db->buf_size = buf_size;
+
 	/* register memory */
 	db->rev_mr = ibv_reg_mr(db->pd, db->rev_buf, buf_size, IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_WRITE); 
 	if(!db->rev_mr)
@@ -259,3 +261,5 @@ int connect_server(db_t *db)
 
     return 0;
 }
+
+int post_rev_request()

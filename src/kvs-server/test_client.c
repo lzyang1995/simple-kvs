@@ -105,6 +105,11 @@ int main(int argc, char   *argv[ ])
 			mr = ibv_reg_mr(pd, buf,1 * sizeof(uint32_t), IBV_ACCESS_LOCAL_WRITE |IBV_ACCESS_REMOTE_READ | IBV_ACCESS_REMOTE_WRITE); 
 			if (!mr) 
 					return 1; 
+#ifdef DEBUG
+			printf("buf: %p, length:%d\n", buf, sizeof(uint32_t));
+			printf("mr->addr: %p, mr->length:%d\n", mr->addr, mr->length);
+			return 0;
+#endif
 
 			qp_attr.cap.max_send_wr = 2; 
 			qp_attr.cap.max_send_sge = 1;
@@ -135,6 +140,7 @@ int main(int argc, char   *argv[ ])
 					return 1;
 			memcpy(&server_pdata, event->param.conn.private_data, sizeof(server_pdata));
 			rdma_ack_cm_event(event);
+/*
 #ifdef DEBUG
 			err = rdma_get_cm_event(cm_channel,&event);
 			if (err)
@@ -145,6 +151,7 @@ int main(int argc, char   *argv[ ])
 				printf("error\n");
 			return 0;
 #endif
+*/
 
 //  above is open operation
 			/* Prepost receive */ 

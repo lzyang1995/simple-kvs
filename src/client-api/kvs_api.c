@@ -90,6 +90,27 @@ db_t * kvsopen(char *addr, char *port, uint32_t buf_size)
 	return db;
 }
 
+/*
+ *	Get data associated with key
+ *	
+ *	params:
+ *	db: 	the pointer returned by kvsopen()
+ *	key:	the key
+ *	data:	used to store the data retrieved
+ *
+ *	return value:
+ *	if success, 0 is returned. 
+ *		if the key is not found, data.data will be NULL
+ *		if the key is found, data.len will denote the length of data(in bytes), 
+ *		and data.data will point to the data, and caller is responsible for freeing it.
+ *	if failure, -1 is returned. data.data will be NULL.
+ */
+
+int kvsget(db_t *db, entry_t *key, entry_t *data)
+{	
+	
+}
+
 int kvsclose(db_t *db)
 {
 	//send CMD_DISCONNECT to server
