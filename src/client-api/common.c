@@ -262,4 +262,31 @@ int connect_server(db_t *db)
     return 0;
 }
 
-int post_rev_request()
+/*
+ *	Post a Receive Request
+ *
+ *	success: return 0
+ *	failure: return -1
+ */
+int post_rev_request(struct rdma_cm_id *cm_id, struct ibv_mr *mr)
+{
+	struct ibv_sge		sge; 
+	struct ibv_recv_wr	recv_wr;
+	struct ibv_recv_wr	*bad_recv_wr; 
+
+	memset(&recv_wr, 0, sizeof(struct ibv_recv_wr));
+
+	sge.addr    	= mr->addr; 
+	sge.length  	= mr->length; 
+	sge.lkey    	= mr->lkey; 
+	recv_wr.wr_id 	= RECV_WR_ID;                
+	recv_wr.sg_list = &sge;
+	recv_wr.num_sge = 1;
+
+	if (ibv_post_recv(cm_id->qp, &recv_wr, &bad_recv_wr) != 0)
+		return -1;
+	else
+		return 0;
+}
+
+int post_send_request()

@@ -43,7 +43,7 @@
 #define SEND_WR_ID 0
 #define RECV_WR_ID 1
 
-#define RESOLVE_TIMEOUT_MS 5000
+//#define RESOLVE_TIMEOUT_MS 5000
 
 #define CQE 1
 

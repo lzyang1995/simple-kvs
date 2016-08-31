@@ -108,6 +108,18 @@ db_t * kvsopen(char *addr, char *port, uint32_t buf_size)
 
 int kvsget(db_t *db, entry_t *key, entry_t *data)
 {	
+	if(key == NULL || key->len == 0)
+		return -1;
+
+	if(post_rev_request(db->cm_id, db->rev_mr) != 0)
+		return -1;
+
+	message_t *msg = (message_t *)db->send_buf;
+	msg->cmd = CMD_GET;
+	msg->key_len = key->len;
+	msg->data_len = 0;
+	memcpy(msg->key_and_data, key->data, key->len);
+
 	
 }
 
